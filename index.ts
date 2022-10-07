@@ -16,13 +16,35 @@ class Canvas {
     strokeStyle: string, 
     lineWidth: number
     ){
-      this.canvas = document.querySelector("canvas");
-      this.context = canvas?.getContext("2d");
-      this.points = [];
-      this.canDraw = false;
-      this.strokeStyle = "#000";
-      this.lineWidth = 5;
-    }
+    this.canvas = document.querySelector("canvas");
+    this.context = canvas?.getContext("2d");
+    this.points = [];
+    this.canDraw = false;
+    this.strokeStyle = "#000";
+    this.lineWidth = 5;
+  }
+
+  initiatesDrawing(){
+    this.canvas?.addEventListener('mousedown', ({ clientX, clientY }) => {
+      this.canDraw = true;
+      savePoint(clientX, clientY, false);
+      draw();
+    });
+  }
+  
+  doDrawing(){
+    this.canvas?.addEventListener('mousemove', ({ clientX, clientY }) => {
+      if (this.canDraw) {
+        savePoint(clientX, clientY, true);
+        draw();
+      }
+    });
+  }
+
+  stopDrawing(){
+    this.canvas?.addEventListener('mouseup', (e) => { this.canDraw = false });
+    this.canvas?.addEventListener('mouseleave', (e) => { this.canDraw = false });
+  }
 }
 
 /* ****** ELEMENTS ****** */
@@ -65,29 +87,11 @@ class StrokeInput {
 
   setStroke(){
     this.input?.addEventListener("change", (e) => {
-      lineWidth = e.target?.value;
+      const lineWidth = e.target?.value;
       draw();
     });
   }
 }
-
-/* ****** CANVAS - EVENTS ****** */
-
-canvas.addEventListener('mousedown', ({ clientX, clientY }) => {
-  canDraw = true;
-  savePoint(clientX, clientY, false);
-  draw();
-});
-
-canvas.addEventListener('mousemove', ({ clientX, clientY }) => {
-  if (canDraw) {
-    savePoint(clientX, clientY, true);
-    draw();
-  }
-});
-
-canvas.addEventListener('mouseup', (e) => { canDraw = false });
-canvas.addEventListener('mouseleave', (e) => { canDraw = false });
 
 /* ****** FUNCTIONS ****** */
 
