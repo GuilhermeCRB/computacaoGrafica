@@ -1,5 +1,3 @@
-configContextForDrawing();
-
 class Canvas {
   canvas: HTMLCanvasElement | null;
   context: CanvasRenderingContext2D | null | undefined;
@@ -8,16 +6,9 @@ class Canvas {
   strokeStyle: string;
   lineWidth: number;
 
-  constructor(
-    canvas: HTMLCanvasElement, 
-    context: CanvasRenderingContext2D, 
-    points: any[], 
-    canDraw: boolean, 
-    strokeStyle: string, 
-    lineWidth: number
-    ){
+  constructor(){
     this.canvas = document.querySelector("canvas");
-    this.context = canvas?.getContext("2d");
+    this.context = this.canvas?.getContext("2d");
     this.points = [];
     this.canDraw = false;
     this.strokeStyle = "#000";
@@ -45,6 +36,46 @@ class Canvas {
     this.canvas?.addEventListener('mouseup', (e) => { this.canDraw = false });
     this.canvas?.addEventListener('mouseleave', (e) => { this.canDraw = false });
   }
+
+  savePoint(x: number, y: number, dragging: any) {
+    const area = this.canvas?.getBoundingClientRect();
+    const point = { x: x - area.left, y: y - area.top, dragging };
+    this.points.push(point);
+  }
+
+  draw() {
+    this.configContextForDrawing();
+  
+    for (var i = 0; i < this.points.length; i++) {
+      this.context?.beginPath();
+      const point = this.points[i];
+      if (point.dragging && i > 0) {
+        const previousPoint = this.points[i - 1];
+        this.context?.moveTo(previousPoint.x, previousPoint.y);
+      } else {
+        this.context?.moveTo(point.x - 1, point.y);
+      }
+      this.context?.lineTo(point.x, point.y);
+      this.context?.closePath();
+      this.context?.stroke();
+    }
+  }
+
+  clean() {
+    this.context?.clearRect(0, 0, this.context?.canvas.width, this.context?.canvas.height);
+    this.context?.fillStyle = "white";
+    this.context?.fillRect(0, 0, this.context?.canvas.width, this.context?.canvas.height);
+    this.points = [];
+  }
+
+  configContextForDrawing() {
+    this.context?.fillStyle = "white";
+    this.context?.fillRect(0, 0, this.context.canvas.width, this.context.canvas.height);
+    this.context?.strokeStyle = this.strokeStyle;
+    this.context?.lineJoin = "round";
+    this.context?.lineWidth = this.lineWidth;
+  }
+  
 }
 
 /* ****** ELEMENTS ****** */
@@ -93,43 +124,5 @@ class StrokeInput {
   }
 }
 
-/* ****** FUNCTIONS ****** */
-
-function savePoint(x, y, dragging) {
-  const area = canvas.getBoundingClientRect();
-  const point = { x: x - area.left, y: y - area.top, dragging };
-  points.push(point);
-}
-
-function draw() {
-  configContextForDrawing();
-
-  for (var i = 0; i < points.length; i++) {
-    context.beginPath();
-    const point = points[i];
-    if (point.dragging && i > 0) {
-      const previousPoint = points[i - 1];
-      context.moveTo(previousPoint.x, previousPoint.y);
-    } else {
-      context.moveTo(point.x - 1, point.y);
-    }
-    context.lineTo(point.x, point.y);
-    context.closePath();
-    context.stroke();
-  }
-}
-
-function configContextForDrawing() {
-  context.fillStyle = "white";
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-  context.strokeStyle = strokeStyle;
-  context.lineJoin = "round";
-  context.lineWidth = lineWidth;
-}
-
-function clean() {
-  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-  context.fillStyle = "white";
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-  points = [];
-}
+const canvas = new Canvas;
+canvas.configContextForDrawing();
